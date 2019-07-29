@@ -1,7 +1,7 @@
 import faker
 import random
 
-RECORDS = 1000000
+RECORDS = 5000000
 
 f = faker.Faker("en_GB")
 

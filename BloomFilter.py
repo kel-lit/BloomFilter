@@ -1,9 +1,9 @@
 import time
 import hashlib
 
-MIN_LEN = 4
-My_HASH = 6
-MAX_LEN = 32
+MIN_LEN = 2
+MY_HASH = 3
+MAX_LEN = 6
 
 class BloomFilter(object):
 
@@ -12,18 +12,22 @@ class BloomFilter(object):
         Function to load the bloom hashes
         """
 
-        with open(file, "r") as f:
+        self.file = file
 
-            self.hashes = f.read().splitlines()
+        # with open(file, "r") as f:
+
+            # self.hashes = f.read().splitlines()
     
     def check_word(self, word):
         
         st = time.time()
 
-        h = create_hash(word, My_HASH)
+        h = create_hash(word, MY_HASH)
+        with open(self.file, "rb") as f:
 
-        print(h)
-        if h in self.hashes:
+            hashes = f.read().splitlines()
+
+        if h in hashes:
             print(f"'{word}' may be in the set")
         else:
             print(f"'{word}' is not in the set")
@@ -37,14 +41,15 @@ class BloomFilter(object):
             lines = f.read().splitlines()
         
         st = time.time()
-        if word in lines:
-            print(f"No bloom: {word} in lines")
+        for line in lines:
+            if word == line:
+                print(f"No bloom: {word} in lines")
 
         print(f"No bloom filter took {time.time() - st:.010f}s")
 
     
 
-def create_bloom_hash(data:list, maximum:int=My_HASH, output_file:str="bloom_hashes.txt"):
+def create_bloom_hash(data:list, maximum:int=MY_HASH, output_file:str="bloom_hashes.txt"):
     """
     This function creates hashes from the data provided.
     Parameters:
@@ -76,15 +81,17 @@ def create_bloom_hash(data:list, maximum:int=My_HASH, output_file:str="bloom_has
     
     hashes = list(hashes)
     hashes.sort()
-    with open(output_file, "w") as f:
-        f.writelines("\n".join(hashes))
+    with open(output_file, "wb") as f:
+        for h in hashes:
+            f.write(h)
+            f.write("\n".encode("utf-8"))
 
 
 def create_hash(word, length):
 
     m = hashlib.blake2b(digest_size=length)
     m.update(bytes(word, "utf-8"))
-    return m.hexdigest()
+    return bytes(m.hexdigest(), "utf-8")
 
 def create():
     with open("usernames.txt", "r", encoding="utf-8") as f:
@@ -105,7 +112,7 @@ def create():
 
 if __name__ == "__main__":
 
-    # create()
+    create()
     b = BloomFilter()
-    b.check_word("TestyTesterson")
-    b.check_word_no_bloom("TestyTesterson")
+    # b.check_word("SmithR519")
+    # b.check_word_no_bloom("SmithR519")
