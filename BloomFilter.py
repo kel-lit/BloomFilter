@@ -13,7 +13,7 @@ class BloomFilter(object):
     def add_bit_vector(self, vector):
 
         #check vector is binary string
-        if set(vector) not in [{"1","0"}, {"0","1"}]:
+        if set(vector) not in [{"1","0"}, {"0","1"}]: # If it's not only 1's and 0's
             raise Exception("Vector must be a binary string")
         
         self.vector = list(vector)
@@ -28,7 +28,7 @@ class BloomFilter(object):
             f = open(file_, "r")
 
         else:
-            raise Exception("file_ must be an open file pointer or a filename")
+            raise Exception("'file_' must be an open file pointer or a filename")
         
         for line in f.readlines():
             if " " in line or "," in line: # Handles lines with multiple words, including lines with commas
