@@ -1,118 +1,100 @@
-import time
+import io
 import hashlib
 
-MIN_LEN = 2
-MY_HASH = 3
-MAX_LEN = 6
+DEFAULT_LENGTH = 1024 * 1024 # 1MB
 
 class BloomFilter(object):
 
-    def __init__(self, file="bloom_hashes.txt"):
-        """
-        Function to load the bloom hashes
-        """
+    def __init__(self, hash_length=DEFAULT_LENGTH):
 
-        self.file = file
+        self.hash_length = hash_length
+        self.vector = [0] * self.hash_length
 
-        # with open(file, "r") as f:
+    def add_bit_vector(self, vector):
 
-            # self.hashes = f.read().splitlines()
-    
-    def check_word(self, word):
+        #check vector is binary string
+        if set(vector) not in [{"1","0"}, {"0","1"}]:
+            raise Exception("Vector must be a binary string")
         
-        st = time.time()
+        self.vector = list(vector)
+        self.hash_length = len(vector)
 
-        h = create_hash(word, MY_HASH)
-        with open(self.file, "rb") as f:
+    def add_strings_from_file(self, file_):
 
-            hashes = f.read().splitlines()
+        if isinstance(file_, io.TextIOWrapper):
+            f = file_
 
-        if h in hashes:
-            print(f"'{word}' may be in the set")
+        elif isinstance(file_, str):
+            f = open(file_, "r")
+
         else:
-            print(f"'{word}' is not in the set")
+            raise Exception("file_ must be an open file pointer or a filename")
         
-        print(f"Bloom filter took {time.time() - st:.010f}s")
-    
-    def check_word_no_bloom(self, word):
-
-        with open("usernames.txt", "r", encoding="utf-8") as f:
-
-            lines = f.read().splitlines()
-        
-        st = time.time()
-        for line in lines:
-            if word == line:
-                print(f"No bloom: {word} in lines")
-
-        print(f"No bloom filter took {time.time() - st:.010f}s")
-
-    
-
-def create_bloom_hash(data:list, maximum:int=MY_HASH, output_file:str="bloom_hashes.txt"):
-    """
-    This function creates hashes from the data provided.
-    Parameters:
-    data (list): List of words to hash. 
-    maximum (int): max length of the hash in bytes. Larger hashes increase accuracy, but increase memory usage. The maximum value is 32.
-    output_file (str): Name of the file to output the hashes to.
-
-    Returns:
-    None
-    """
-
-    if not isinstance(data, (list, tuple)):
-        raise TypeError("'data' must be an iterable")
-    
-    if not isinstance(maximum, int):
-        raise TypeError("'maximum' must be an integer")
-    
-    if maximum not in range(MIN_LEN, MAX_LEN+1):
-        raise ValueError(f"'maximum' must be an integer between {MIN_LEN}-{MAX_LEN}")
-
-    if not isinstance(output_file, str):
-        raise TypeError("'output_file' must be a string")
-
-    hashes = set()
-    for word in data:
-
-        h = create_hash(word, maximum)
-        hashes.add(h)
-    
-    hashes = list(hashes)
-    hashes.sort()
-    with open(output_file, "wb") as f:
-        for h in hashes:
-            f.write(h)
-            f.write("\n".encode("utf-8"))
-
-
-def create_hash(word, length):
-
-    m = hashlib.blake2b(digest_size=length)
-    m.update(bytes(word, "utf-8"))
-    return bytes(m.hexdigest(), "utf-8")
-
-def create():
-    with open("usernames.txt", "r", encoding="utf-8") as f:
-
-        to_hash = []
-        lines = f.read().splitlines()
-
-        for line in lines:
-
-            if line.startswith("#"):
-                line = f.readline()
+        for line in f.readlines():
+            if " " in line or "," in line: # Handles lines with multiple words, including lines with commas
+                self.add_strings([l for l in line.split() if l not in [" ", ","]])
                 continue
 
-            to_hash.append(line)
+            self.add_string(line)
         
-        create_bloom_hash(to_hash)
+    def add_strings(self, strings):
+
+        for string in strings:
+            self.add_string(string)
+    
+    def add_string(self, string):
+
+        blake2 = self.get_blake2_hash(string)
+        blake2_dec = self.get_blake2_value(string)
+
+        self.vector[blake2_dec] = 1
+    
+    def get_blake2_value(self, string):
+
+        blake2 = self.get_blake2_hash(string)
+
+        return int(blake2, 16) % self.hash_length
+
+    def get_blake2_hash(self, string):
+
+        h = hashlib.blake2b()
+        h.update(bytes(string, "utf-8"))
+
+        return bytes(h.hexdigest(), "utf-8")
+
+    def test_for_string(self, string):
+
+        blake2 = self.get_blake2_value(string)
+
+        if self.vector[blake2] == 1:
+            print(f"{string} is possibly in the set")
+        else:
+            print(f"{string} is definitely not in the set")
+
+    def __repr__(self):
+
+        return "".join(str(b) for b in self.vector)
+
+    def write_vector_to_file(self, fname):
+
+        with open(fname, "w") as f:
+            f.write(self.__repr__())
+
 
 
 if __name__ == "__main__":
 
-    create()
-    b = BloomFilter()
-    # b.check_word("SmithR519")
-    # b.check_word_no_bloom("SmithR519")
+    bf = BloomFilter()
+
+    bf.add_bit_vector(open("hash.txt", "r").readline())
+    #bf.add_strings_from_file("usernames.txt")
+    bf.write_vector_to_file("hash.txt")
+
+    bf.test_for_string("NicoleB330")
+    bf.test_for_string("cheese")
+
+
+    #bf.add_strings("Hello world this is a bloom filter".split(" "))
+
+    #bf.test_for_string("Hello")
+    #bf.test_for_string("cheese")
