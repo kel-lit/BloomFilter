@@ -44,7 +44,6 @@ class BloomFilter(object):
     
     def add_string(self, string):
 
-        blake2 = self.get_blake2_hash(string)
         blake2_dec = self.get_blake2_value(string)
 
         self.vector[blake2_dec] = 1
