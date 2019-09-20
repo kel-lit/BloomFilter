@@ -31,7 +31,7 @@ class BloomFilter(object):
             raise Exception("'file_' must be an open file pointer or a filename")
         
         for line in f.readlines():
-            if " " in line or "," in line: # Handles lines with multiple words, including lines with commas
+            if " " in line or "," in line or "." in line: # Handles lines with multiple words, including lines with commas
                 self.add_strings([l for l in line.split() if l not in [" ", ","]])
                 continue
 
