@@ -13,29 +13,46 @@ Bloom Filters use a fixed-size bit array *A*, with all bits set to 0, to keep tr
 #### Here's an example: 
 
 Let's start with a 8 bit (1 byte) array *A*:
-`[0,0,0,0,0,0,0,0]`
+`[0,0,0,0,0,0,0,0]`.
+
 So *m = 10*.
+
 We have a hash function *f*.
+
 We want to add the word "hello" to our set.
+
 We run the work through the hash function: `f("hello") = 23`.
+
 Then we need to use modulo on the value: `23 % m = 3`.
+
 Now we've got `3`, so we'll set *A<sub>3</sub>* to 1. 
+
 `[0,0,0,1,0,0,0,0]`
+
 > Note: Arrays start from 0, not 1.
 
 Let's add the word "world" to the set now: `f("world") = 45`.
+
 We'll use modulo again: `45 % m = 5`.
+
 And we'll set *A<sub>5</sub>* to 1.
+
 `[0,0,0,1,0,1,0,0]`
 
 This is a really simple example, but you can see how we've reduced the size of the information. "hello" and "world" are 5 bytes each, but we've created something that can test for these words in a single byte.
 
 #### Here's the main problem with Bloom Filters:
 So we've got our bit array: 
-`[0,0,0,1,0,1,0,0]`
+`[0,0,0,1,0,1,0,0]`.
+
 We want to check if the word "foo" is in the set.
-So we use the same hash function to search: `f("foo") = 15`
-We'll use modulo to get an index: `15 % m = 5`
+
+So we use the same hash function to search: `f("foo") = 15`.
+
+We'll use modulo to get an index: `15 % m = 5`.
+
 Then we'll check the value in the bit array at index 5.
+
 `[0,0,0,1,0,`<strong>`1`</strong>`,0,0]`
+
 The bit at index 5 is set to 1. This is one of those false positives mentioned at the beginning, and demonstrates why Bloom Filters can never be certain that an element is in the set.
