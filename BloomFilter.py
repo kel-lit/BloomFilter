@@ -85,15 +85,8 @@ if __name__ == "__main__":
 
     bf = BloomFilter()
 
-    bf.add_bit_vector(open("hash.txt", "r").readline())
-    #bf.add_strings_from_file("usernames.txt")
+    bf.add_strings_from_file("usernames.txt")
     bf.write_vector_to_file("hash.txt")
 
     bf.test_for_string("NicoleB330")
-    bf.test_for_string("cheese")
-
-
-    #bf.add_strings("Hello world this is a bloom filter".split(" "))
-
-    #bf.test_for_string("Hello")
-    #bf.test_for_string("cheese")
+    bf.test_for_string("notAnElement")
