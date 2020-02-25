@@ -55,4 +55,4 @@ Then we'll check the value in the bit array at index 5.
 
 `[0,0,0,1,0,`<strong>`1`</strong>`,0,0]`
 
-The bit at index 5 is set to 1. This is one of those false positives mentioned at the beginning, and demonstrates why Bloom Filters can never be certain that an element is in the set.
+The bit at index 5 is set to 1, indicating that "foo" may be in the set. Of course, we know that it's not. This is one of those false positives mentioned at the beginning, and demonstrates why Bloom Filters can never be certain that an element is in the set.
