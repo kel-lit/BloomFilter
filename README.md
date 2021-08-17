@@ -23,11 +23,11 @@ We want to add the word "hello" to our set.
 
 We run the work through the hash function: `f("hello") = 23`.
 
-Then we need to use modulo on the value: `23 % m = 3`.
+Then we need to use modulo on the value: `23 % m = 7`.
 
-Now we've got `3`, so we'll set *A<sub>3</sub>* to 1. 
+Now we've got `7`, so we'll set *A<sub>3</sub>* to 1. 
 
-`[0,0,0,1,0,0,0,0]`
+`[0,0,0,0,0,0,1,0]`
 
 > Note: Arrays start from 0, not 1.
 
@@ -41,15 +41,17 @@ And we'll set *A<sub>5</sub>* to 1.
 
 This is a really simple example, but you can see how we've reduced the size of the information. "hello" and "world" are 5 bytes each, but we've created something that can test for these words in a single byte.
 
+Bloom filters in the wild use much larger bit arrays, and also typically use more than one hash function on the same input to produce more than one value to check against.
+
 #### Here's the main problem with Bloom Filters:
 So we've got our bit array: 
 `[0,0,0,1,0,1,0,0]`.
 
 We want to check if the word "foo" is in the set.
 
-So we use the same hash function to search: `f("foo") = 15`.
+So we use the same hash function to search: `f("foo") = 13`.
 
-We'll use modulo to get an index: `15 % m = 5`.
+We'll use modulo to get an index: `13 % m = 5`.
 
 Then we'll check the value in the bit array at index 5.
 
