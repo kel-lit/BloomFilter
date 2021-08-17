@@ -15,7 +15,7 @@ Bloom Filters use a fixed-size bit array *A*, with all bits set to 0, to keep tr
 Let's start with a 8 bit (1 byte) array *A*:
 `[0,0,0,0,0,0,0,0]`.
 
-So *m = 10*.
+So *m = 8*.
 
 We have a hash function *f*.
 
